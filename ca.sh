@@ -65,7 +65,7 @@ request() {
 }
 
 sign() {
-    openssl ca -config openssl.cnf -utf8 -extensions $2 -in $1 -batch
+    openssl ca -config openssl.cnf -utf8 -extensions $2 -in $1 -batch 1>&2
 
     echo ${CA_ROOT}/newcerts/$(cat ${CA_ROOT}/serial.old).pem
 }
@@ -93,7 +93,9 @@ case "$1" in
         key=$(privkey $f $PASS_PHRASE)
         csr=$(request $key)
         cert=$(sign $csr v3_server)
-        export $key $cert
+        echo Private key generated: $key
+        echo Certificate file generated: $cert
+        echo PKCS12 file exported: $(export $key $cert)
         ;;
     client)
         f=$(name_of_base)
@@ -101,7 +103,9 @@ case "$1" in
         key=$(privkey $f $PASS_PHRASE)
         csr=$(request $key)
         cert=$(sign $csr v3_client)
-        export $key $cert
+        echo Private key generated: $key
+        echo Certificate file generated: $cert
+        echo PKCS12 file exported: $(export $key $cert)
         ;;
     privkey)
         privkey $2 $3
