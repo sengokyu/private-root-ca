@@ -70,3 +70,15 @@ Google Chrome 58 移行で必須です。
 ```console
 ./ca.sh client
 ```
+
+### 証明書を無効化
+
+```console
+./ca.sh revoke 証明書ファイル名
+```
+
+証明書作成時に以下のようなエラーが出るときは、先に同じ共通名の証明書を無効にしておく必要があります。
+
+```
+ERROR:There is already a certificate for
+```
