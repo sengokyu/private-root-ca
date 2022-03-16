@@ -30,7 +30,7 @@ init() {
         ## -x509 option outputs a self signed certificate instead of CSR
         ##
         openssl req \
-            -config openssl.cnf \
+            -config openssl-ca.cnf \
             -new \
             -utf8 \
             -x509 \
@@ -57,15 +57,23 @@ privkey() {
 }
 
 request() {
+    read -p "Subject Alternative Name (e.g DNS:example.com): " san
+
     output=request/$(basename $1 .pem).pem
 
-    openssl req -config openssl.cnf -new -utf8 -key $1 -out $output
+    openssl req -config openssl.cnf -new -utf8 -key $1 -out $output \
+        -addext "subjectAltName=${san}" \
 
     echo $output
 }
 
 sign() {
-    openssl ca -config openssl.cnf -utf8 -extensions $2 -in $1 -batch 1>&2
+    read -p "Number of days to certify the cert for [365]: " days
+
+    openssl ca -config openssl-ca.cnf -utf8 -extensions $2 -in $1 -batch \
+        -days ${days:-365} \
+        -notext \
+        1>&2
 
     echo ${CA_ROOT}/newcerts/$(cat ${CA_ROOT}/serial.old).pem
 }
@@ -79,7 +87,7 @@ export() {
 }
 
 revoke() {
-    openssl ca -config openssl.cnf -revoke $1
+    openssl ca -config openssl-ca.cnf -revoke $1
 }
 
 
